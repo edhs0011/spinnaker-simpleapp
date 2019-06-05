@@ -1,0 +1,85 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simpleapp
+  labels:
+    app: simpleapp
+    service: simpleapp
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: simpleapp
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: simpleapp-baseline
+  name: simpleapp-baseline
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simpleapp
+      version: baseline
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8000'
+      labels:
+        app: simpleapp
+        version: baseline
+    spec:
+      containers:
+      - env:
+        - name: APP_VERSION
+          value: v2
+        image: edhs0011/simple_app:latest
+        name: simpleapp
+        ports:
+        - containerPort: 8000
+        - containerPort: 9080
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: simpleapp-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: simpleapp
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - simpleapp-gateway
+  http:
+  - match:
+    - uri:
+        exact: /simpleapp
+    - uri:
+        exact: /
+    route:
+    - destination:
+        host: simpleapp
+        port:
+          number: 9080
+
