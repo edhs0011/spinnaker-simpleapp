@@ -1,0 +1,52 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: simpleapp
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - simpleapp-gateway
+  http:
+  - match:
+    - uri:
+        exact: /simpleapp
+    - uri:
+        exact: /
+    route:
+    - destination:
+        host: simpleapp
+        subset: production
+        port:
+          number: 9080
+      weight: 60
+    - destination:
+        host: simpleapp
+        subset: baseline
+        port:
+          number: 9080
+      weight: 20
+    - destination:
+        host: simpleapp
+        subset: canary
+        port:
+          number: 9080
+      weight: 20
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: simpleapp
+spec:
+  host: simpleapp
+  subsets:
+  - name: production
+    labels:
+      version: production
+  - name: baseline
+    labels:
+      version: baseline
+  - name: canary
+    labels:
+      version: canary
