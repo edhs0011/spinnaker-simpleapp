@@ -12,10 +12,10 @@ c = Counter('requests', 'Number of requests served, by http code', ['http_code']
 def hello():
     if os.environ['APP_VERSION']=='v1':
         c.labels(http_code = '500').inc()
-        return "Internal Server Error\n", 500
+        return "<h1>Oops, service is not stable</h1>", 500
     else:
         c.labels(http_code = '200').inc()
-        return "Hello World!\n"
+        return "<h1>Oh ya! service is god damn good<h1>"
 
 start_http_server(8000)
 app.run(host = '0.0.0.0', port = 9080)
