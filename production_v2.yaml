@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: simpleapp-baseline
+  name: simpleapp-production
   namespace: default
 spec:
   replicas: 1
@@ -12,14 +12,14 @@ spec:
         prometheus.io/scrape: 'true'
       labels:
         app: simpleapp
-        version: baseline
+        version: production
     spec:
       containers:
         - env:
             - name: APP_VERSION
-              value: v1
+              value: v2
           image: 'edhs0011/simple_app:latest'
-          name: simpleapp-baseline
+          name: simpleapp-production
           ports:
             - containerPort: 8000
             - containerPort: 9080
